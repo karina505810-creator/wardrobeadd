@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добавить вещь</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 20px auto; padding: 15px; background: #f9f9f9; color: #333; }
+        .card { background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        h2 { margin-top: 0; text-align: center; color: #333; font-size: 22px; margin-bottom: 20px; }
+        
+        /* Предупреждение */
+        .warning { background: #fff7ed; border-left: 4px solid #f97316; padding: 12px 16px; margin-bottom: 24px; font-size: 13px; color: #c2410c; border-radius: 6px; line-height: 1.4; }
+        
+        /* Общие стили полей */
+        label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: #475569; margin-top: 16px; }
+        label.required::after { content: " *"; color: #ef4444; }
+        
+        input[type="file"], select { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; box-sizing: border-box; font-size: 14px; background: #fff; transition: border-color 0.2s; }
+        input[type="file"]:focus, select:focus { outline: none; border-color: #3b82f6; }
+        input[type="file"] { padding: 8px; background: #f8fafc; }
+
+        /* === ВИЗУАЛЬНЫЕ БЛОКИ (НОВЫЕ ЦВЕТА) === */
+        
+        /* 1. Блок обязательных полей (РОЗОВЫЙ) */
+        .required-group {
+            background-color: #fdf2f8; /* Нежно-розовый фон */
+            border: 1px solid #fce7f3;
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        .required-group-title {
+            font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; 
+            color: #be185d; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;
+        }
+
+        /* 2. Блоки опциональных групп */
+        .option-group {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 16px;
+            margin-bottom: 16px;
+        }
+        .group-title {
+            font-size: 13px; color: #334155; font-weight: 600; margin-bottom: 12px; display: block;
+        }
+
+                /* Специальный цвет для НАЗНАЧЕНИЯ (ОРАНЖЕВЫЙ) */
+        .occasion-group {
+            background-color: #fff7ed; /* Нежно-оранжевый фон */
+            border: 1px solid #ffedd5;
+        }
+        .occasion-group .group-title { color: #c2410c; }
+
+        /* Специальный цвет для МЕТОК (ГОЛУБОЙ) */
+        .marks-group {
+            background-color: #eff6ff; /* Светло-голубой фон */
+            border: 1px solid #dbeafe;
+        }
+        .marks-group .group-title { color: #1e40af; }
+
+        /* 3. Блок комментария (Желтоватый) */
+        .comment-group {
+            background-color: #fffbeb;
+            border: 1px solid #fef08a;
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 16px;
+            margin-bottom: 16px;
+        }
+
+        /* Стили для чекбоксов */
+        .checkbox-group { display: flex; flex-wrap: wrap; gap: 8px; }
+        .checkbox-label { 
+            display: inline-flex; align-items: center; gap: 6px; 
+            padding: 8px 14px; border: 1px solid #e2e8f0; border-radius: 20px; 
+            cursor: pointer; font-size: 13px; transition: all 0.2s; user-select: none; background: #fff;
+        }
+        .checkbox-label:hover { background: #f1f5f9; border-color: #cbd5e1; }
+        .checkbox-label input { display: none; }
+        .checkbox-label.checked { 
+    background: #16a34a !important; /* Более насыщенный зеленый */
+    border-color: #14532d !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    box-shadow: 0 2px 8px rgba(22, 163, 74, 0.4);
+}
+        
+        /* Стили для радио-кнопок */
+        .radio-group { display: flex; gap: 10px; }
+        .radio-label { 
+            flex: 1; text-align: center; padding: 10px; border: 1px solid #e2e8f0; 
+            border-radius: 8px; cursor: pointer; font-size: 13px; transition: all 0.2s; background: #fff;
+        }
+        .radio-label:hover { background: #f1f5f9; }
+        .radio-label input { display: none; }
+        .radio-label.selected { 
+    background: #16a34a !important; /* Насыщенный зеленый */
+    border-color: #14532d !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    box-shadow: 0 2px 8px rgba(22, 163, 74, 0.4);
+}
+
+        /* Кнопка загрузки */
+        button { width: 100%; padding: 16px; background: #22c55e; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 24px; transition: background 0.2s; box-shadow: 0 4px 6px -1px rgba(34, 197, 94, 0.2); }
+        button:hover { background: #16a34a; transform: translateY(-1px); }
+        button:disabled { background: #cbd5e1; cursor: not-allowed; transform: none; box-shadow: none; }
+        
+        #status { margin-top: 15px; text-align: center; font-weight: bold; min-height: 20px; font-size: 14px; }
+        .success { color: #16a34a; }
+        .error { color: #dc2626; }
+        
+        textarea { width: 100%; min-height: 70px; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 13px; resize: vertical; box-sizing: border-box; font-family: inherit; background: #fff; }
+        textarea:focus { outline: none; border-color: #3b82f6; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>👗 Добавить новую одежду</h2>
+        <div class="warning">️ Фото должно быть на белом фоне (покрывало/простыня) и желательно не больше 5мб (JPG).</div>
+        
+        <!-- ОБЯЗАТЕЛЬНЫЕ ПОЛЯ В РОЗОВОМ БЛОКЕ -->
+        <div class="required-group">
+            <div class="required-group-title"> Обязательные данные</div>
+            
+            <label class="required">Фотография</label>
+            <input type="file" id="fileInput" accept="image/jpeg, image/jpg" onchange="validateForm()">
+            
+            <label class="required">Месторасположение</label>
+            <select id="placeSelect" onchange="validateForm()">
+                <option value="">— Выберите —</option>
+                <option value="PL_01">На ближних полках</option>
+                <option value="PL_02">На дальних полках</option>
+                <option value="PL_03">Под кроватью</option>
+                <option value="PL_04">На балконе</option>
+                <option value="PL_05">У родителей в шкафу</option>
+                <option value="PL_06">У родителей на крыше</option>
+                <option value="PL_07">Другое</option>
+            </select>
+
+            <label class="required">Категория</label>
+            <select id="categorySelect" onchange="validateForm()">
+                <option value="">— Выберите —</option>
+                <option value="CAT_01">Верх</option>
+                <option value="CAT_02">Низ</option>
+                <option value="CAT_03">Верх+Низ</option>
+                <option value="CAT_04">Верхняя одежда</option>
+                <option value="CAT_05">Аксессуары</option>
+                <option value="CAT_06">Обувь</option>
+                <option value="CAT_08">Белье</option>
+                <option value="CAT_09">Носки</option>
+                <option value="CAT_07">Другое</option>
+            </select>
+
+            <!-- ИСПРАВЛЕННЫЙ АЛФАВИТНЫЙ СПИСОК ТИПОВ ОДЕЖДЫ -->
+                        <label class="required">Тип одежды</label>
+            <select id="typeSelect" onchange="validateForm()">
+                <option value="">— Выберите —</option>
+                <!-- ДРУГОЕ В НАЧАЛЕ -->
+                <option value="T_31">Другое</option> 
+                
+                <!-- Б -->
+                <option value="T_23">Безрукавка</option>
+                <option value="T_24">Белье</option>
+                <option value="T_08">Блузка</option>
+                <option value="T_01">Брюки</option>
+                
+                <!-- В -->
+                <option value="T_26">Варежки</option>
+                <option value="T_46">Валенки</option>
+                <option value="T_14">Ветровка</option>
+                <option value="T_07">Водолазка</option>
+
+                <!-- Г -->
+                <option value="T_49">Галоши</option>
+                
+                <!-- Д -->
+                <option value="T_10">Джинсовка</option>
+                <option value="T_47">Дождевик</option>
+
+                <!-- З -->
+                <option value="T_42">Зонт</option>
+                
+                <!-- К -->
+                <option value="T_16">Кроссовки</option>
+                <option value="T_30">Кепка</option>
+                <option value="T_06">Кофта</option>
+                <option value="T_12">Куртка</option>
+                <option value="T_44">Колготки</option>
+                <option value="T_48">Купальник</option>
+                
+                <!-- Л -->
+                <option value="T_03">Лонгслив</option>
+                <option value="T_43">Лосины</option>
+                
+                <!-- Н -->
+                <option value="T_25">Носки</option>
+
+                <!-- О -->
+                <option value="T_40">Очки</option>
+                
+                <!-- П -->
+                <option value="T_21">Панама</option>
+                <option value="T_11">Пальто</option>
+                <option value="T_27">Перчатки</option>
+                <option value="T_33">Пиджак</option>
+                <option value="T_13">Плащ</option>
+                <option value="T_09">Платье</option>
+                <option value="T_29">Платок</option>
+                
+                <!-- Р -->
+                <option value="T_35">Ремень</option>
+                <option value="T_04">Рубашка</option>
+                <option value="T_37">Рюкзак</option>
+                
+                <!-- С -->
+                <option value="T_18">Сапоги</option>
+                <option value="T_19">Сланцы</option>
+                <option value="T_34">Сорочка</option>
+                <option value="T_05">Свитшот</option>
+                <option value="T_38">Свитшот с замком</option>
+                <option value="T_39">Сумка</option>
+                
+                <!-- Т -->
+                <option value="T_17">Туфли</option>
+                <option value="T_41">Тапочки</option>
+                
+                <!-- Ф -->
+                <option value="T_02">Футболка</option>
+                <option value="T_45">Фартук</option>
+                
+                <!-- Х -->
+                <option value="T_32">Халат</option>
+                
+                <!-- Ш -->
+                <option value="T_28">Шарф</option>
+                <option value="T_20">Шапка</option>
+                <option value="T_15">Шуба</option>
+                <option value="T_36">Шорты</option>
+                
+                <!-- Ю -->
+                <option value="T_22">Юбка</option>
+            </select>
+
+            <label class="required">Цвет</label>
+            <select id="colorSelect" onchange="validateForm()">
+                <option value="">— Выберите —</option>
+                <option value="C_01">Коричневый</option>
+                <option value="C_02">Черный</option>
+                <option value="C_03">Белый</option>
+                <option value="C_04">Зеленый</option>
+                <option value="C_08">Светло-зеленый</option>
+                <option value="C_05">Голубой</option>
+                <option value="C_06">Оранжевый</option>
+                <option value="C_15">Синий</option>
+                <option value="C_07">Темно-синий</option>
+                <option value="C_10">Фуксия</option>
+                <option value="C_11">Красный</option>
+                <option value="C_12">Розовый</option>
+                <option value="C_13">Сиреневый</option>
+                <option value="C_14">Желтый</option>
+                <option value="C_16">Бордовый</option>
+                <option value="C_17">Бежевый</option>
+                <option value="C_18">Серый</option>
+                <option value="C_09">Другой</option>
+            </select>
+
+            <label class="required">Статус</label>
+            <select id="statusSelect" onchange="validateForm()">
+                <option value="">— Выберите —</option>
+                <option value="ST_OK">Доступна</option>
+                <option value="ST_WASH">В стирке</option>
+                <option value="ST_SELL">Продать</option>
+                <option value="ST_THINK">Подумать</option>
+                <option value="ST_TRASH">Выкинуть</option>
+                <option value="ST_SMALL">Стало маленькое</option>
+                <option value="ST_BIG">Стало большое</option>
+                <option value="ST_NOTWEAR">Пока не ношу</option>
+                <option value="ST_OTHER">Другое</option>
+            </select>
+        </div>
+
+        <!-- ОПЦИОНАЛЬНЫЕ ГРУППЫ -->
+        
+        <div class="option-group">
+            <span class="group-title">☀️ Сезон (можно несколько)</span>
+            <div class="checkbox-group" id="seasonGroup">
+                <label class="checkbox-label"><input type="checkbox" value="S_SUMMER"> Лето</label>
+                <label class="checkbox-label"><input type="checkbox" value="S_DEMI"> Осень/Весна</label>
+                <label class="checkbox-label"><input type="checkbox" value="S_WINTER"> Зима</label>
+            </div>
+        </div>
+
+        <!-- НАЗНАЧЕНИЕ В ЗЕЛЕНОМ БЛОКЕ -->
+        <div class="option-group occasion-group">
+            <span class="group-title">🎯 Назначение (можно несколько)</span>
+            <div class="checkbox-group" id="occasionGroup">
+                <label class="checkbox-label"><input type="checkbox" value="O_WALK_FAST"> Для быстрой прогулки</label>
+                <label class="checkbox-label"><input type="checkbox" value="O_WALK_NICE"> Для красивой прогулки</label>
+                <label class="checkbox-label"><input type="checkbox" value="O_HOME"> Для дома</label>
+                <label class="checkbox-label"><input type="checkbox" value="O_WORK"> Для офиса</label>
+                <label class="checkbox-label"><input type="checkbox" value="O_SPORT"> Для спорта</label>
+                <label class="checkbox-label"><input type="checkbox" value="O_THEATER"> Для театра</label>
+                <label class="checkbox-label"><input type="checkbox" value="O_NY"> Для нового года</label>
+                <label class="checkbox-label"><input type="checkbox" value="O_BEACH"> Для пляжа</label>
+                <label class="checkbox-label"><input type="checkbox" value="O_HIKE"> Для походов</label>
+                <label class="checkbox-label"><input type="checkbox" value="O_GARDEN_KR"> Для сада у родителей</label>
+                <label class="checkbox-label"><input type="checkbox" value="O_HOME_KR"> Для дома у родителей</label>
+                <label class="checkbox-label"><input type="checkbox" value="O_TRAVEL"> Для путешествий</label>
+                <label class="checkbox-label"><input type="checkbox" value="O_SPBMSK"> Для Спб/Мск</label>
+                <label class="checkbox-label"><input type="checkbox" value="O_OTHER"> Для другого</label>
+            </div>
+        </div>
+
+                <div class="option-group">
+            <span class="group-title">❤️ Лайк (выберите один или ничего)</span>
+            <div class="checkbox-group" id="likeGroup">
+                <label class="checkbox-label like-btn"><input type="checkbox" value="LIKE_YES"> Нравится</label>
+                <label class="checkbox-label like-btn"><input type="checkbox" value="DISLIKE_NO"> Не нравится</label>
+            </div>
+        </div>
+
+        <!-- МЕТКИ В ГОЛУБОМ БЛОКЕ -->
+        <div class="option-group marks-group">
+            <span class="group-title">⭐ Метки (можно отметить)</span>
+            <div class="checkbox-group" id="markGroup">
+                <label class="checkbox-label"><input type="checkbox" value="LIKE_OFTEN"> Часто ношу</label>
+                <label class="checkbox-label"><input type="checkbox" value="LIKE_FAV"> Избранное</label>
+                <label class="checkbox-label"><input type="checkbox" value="NOT_WEAR"> Не ношу</label
+            </div>
+        </div>
+
+        <!-- ПОЛЕ ЗАМЕТОК В ОТДЕЛЬНОМ БЛОКЕ -->
+        <div class="comment-group">
+            <label style="margin-top:0;">💬 Комментарий (необязательно)</label>
+            <textarea id="noteInput" maxlength="200" placeholder="Напишите заметку о вещи..."></textarea>
+            <div style="font-size:10px; color:#94a3b8; margin-top:6px; text-align:right;">Макс. 200 символов</div>
+        </div>
+
+        <button onclick="handleUpload()" id="uploadBtn" disabled>Загрузить вещь</button>
+        <div id="status"></div>
+    </div>
+
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script>
+        // ⚠️ ЗАМЕНИ НА СВОИ ДАННЫЕ!
+        const CLIENT_ID = '65197141435-fbj35oj349qgrno3pk64h4ojs0jojfka.apps.googleusercontent.com'; 
+        const FOLDER_ID = '1eJPqPw239U2OeAkNji6GozVX1el2jT-X'; 
+        const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzrf0SwQZ9jY2FxcBzyVCHrUyc4hTgn1mdKplnhIeBrXgV4e7ttG_0u4BXWEuz8PcK9zQ/exec';
+        
+        let tokenClient;
+        let accessToken = null;
+
+        function initTokenClient() {
+            tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: CLIENT_ID,
+                scope: 'https://www.googleapis.com/auth/drive.file',
+                callback: (res) => {
+                    if (res && res.access_token) { accessToken = res.access_token; }
+                },
+            });
+        }
+        window.onload = () => { initTokenClient(); setupCheckboxListeners(); };
+
+                function setupCheckboxListeners() {
+            document.querySelectorAll('.checkbox-label input').forEach(cb => {
+                cb.addEventListener('change', (e) => {
+                    const label = e.target.parentElement;
+                    label.classList.toggle('checked', e.target.checked);
+                    
+                    // === ЛОГИКА ДЛЯ ЛАЙКОВ (как радио-кнопки) ===
+                    if (label.classList.contains('like-btn')) {
+                        if (e.target.checked) {
+                            // Если выбрали лайк, снимаем галочку с другого
+                            document.querySelectorAll('#likeGroup .checkbox-label input').forEach(otherCb => {
+                                if (otherCb !== e.target) {
+                                    otherCb.checked = false;
+                                    otherCb.parentElement.classList.remove('checked');
+                                }
+                            });
+                        }
+                    }
+                    // ==============================================
+                });
+            });
+        }
+
+                
+
+        function validateForm() {
+            const file = document.getElementById('fileInput').files.length;
+            const place = document.getElementById('placeSelect').value;
+            const cat = document.getElementById('categorySelect').value;
+            const type = document.getElementById('typeSelect').value;
+            const color = document.getElementById('colorSelect').value;
+            const status = document.getElementById('statusSelect').value;
+            const isValid = file && place && cat && type && color && status;
+            document.getElementById('uploadBtn').disabled = !isValid;
+        }
+
+        function getSelectedTags(groupId) {
+            return Array.from(document.querySelectorAll(`#${groupId} input:checked`)).map(cb => cb.value);
+        }
+
+        async function handleUpload() {
+            const btn = document.getElementById('uploadBtn');
+            const statusDiv = document.getElementById('status');
+            
+            if (!accessToken) {
+                statusDiv.textContent = '⏳ Запрос доступа...';
+                await new Promise((resolve, reject) => {
+                    tokenClient.callback = (res) => {
+                        if (res && res.access_token) { accessToken = res.access_token; resolve(); }
+                        else reject(new Error('Нет доступа'));
+                    };
+                    tokenClient.requestAccessToken({ prompt: 'consent' });
+                });
+            }
+
+            btn.disabled = true;
+            statusDiv.className = '';
+            statusDiv.textContent = '⏳ Сжатие фото...';
+
+            try {
+                const file = document.getElementById('fileInput').files[0];
+                const img = new Image();
+                img.src = URL.createObjectURL(file);
+                await new Promise(resolve => img.onload = resolve);
+
+                const CANVAS_WIDTH = 540; const CLOTHES_RATIO = 0.75; const PAD = 20;
+                const targetW = Math.round(CANVAS_WIDTH * CLOTHES_RATIO);
+                const ratio = targetW / img.width;
+                const newW = targetW; const newH = Math.round(img.height * ratio);
+                const canvasW = CANVAS_WIDTH + (PAD * 2); const canvasH = newH + (PAD * 2) + 10;
+                
+                const canvas = document.createElement('canvas');
+                canvas.width = canvasW; canvas.height = canvasH;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#FCFCFA'; ctx.fillRect(0, 0, canvasW, canvasH);
+                const xPos = (CANVAS_WIDTH - newW) / 2;
+                ctx.drawImage(img, xPos + PAD, PAD, newW, newH);
+                
+                const compressedBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.85));
+                statusDiv.textContent = '⏳ Загрузка на Диск...';
+
+                // 1. Чистое имя без расширения (для таблицы и приложения)
+                const cleanFileName = file.name.replace(/\.[^/.]+$/, ""); 
+                // 2. Имя с расширением (только для Google Диска)
+                const metadata = { name: cleanFileName + '.jpg', parents: [FOLDER_ID], mimeType: 'image/jpeg' };
+                const form = new FormData();
+                form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+                form.append('file', compressedBlob);
+
+                const uploadRes = await fetch(`https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart`, {
+                    method: 'POST', headers: { 'Authorization': `Bearer ${accessToken}` }, body: form
+                });
+
+                if (!uploadRes.ok) throw new Error('Ошибка загрузки файла');
+                const fileData = await uploadRes.json();
+                const imageUrl = `https://lh3.googleusercontent.com/d/${fileData.id}=w1000`;
+                statusDiv.textContent = '✅ Фото загружено! Сохраняем данные...';
+
+                                // Собираем все теги (сезоны, назначения, метки)
+                const tags = [
+                    ...getSelectedTags('seasonGroup'), 
+                    ...getSelectedTags('occasionGroup'), 
+                    ...getSelectedTags('markGroup'),
+                    ...getSelectedTags('likeGroup') // <=== ДОБАВЛЯЕМ ЛАЙКИ СЮДА ЖЕ
+                ];
+                
+                // Старые строки про likeTag можно полностью УДАЛИТЬ, они больше не нужны
+
+                const noteText = document.getElementById('noteInput').value.trim();
+                if (noteText) tags.push('NOTE_' + noteText);
+
+                await fetch(SHEET_URL, {
+                    method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'addItem', fileName: cleanFileName, imageUrl: imageUrl, // <-- ИЗМЕНИЛИ ЗДЕСЬ
+                        // ... остальной код
+                        statusId: document.getElementById('statusSelect').value,
+                        placeId: document.getElementById('placeSelect').value,
+                        categoryId: document.getElementById('categorySelect').value,
+                        typeId: document.getElementById('typeSelect').value,
+                        colorId: document.getElementById('colorSelect').value,
+                        tags: tags
+                    })
+                });
+
+                statusDiv.className = 'success';
+                statusDiv.textContent = `🎉 Готово! Вес: ${Math.round(compressedBlob.size/1024)} KB`;
+                document.getElementById('fileInput').value = '';
+                document.getElementById('noteInput').value = '';
+                validateForm();
+
+            } catch (err) {
+                console.error(err);
+                statusDiv.className = 'error';
+                statusDiv.textContent = '❌ Ошибка: ' + err.message;
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
